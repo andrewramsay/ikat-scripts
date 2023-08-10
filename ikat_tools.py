@@ -106,7 +106,7 @@ def write_hashes(hash_file: '_csv._writer', cwid: str, passages: List[str]) -> N
         md5.update(p.encode('utf-8'))
         hash_file.writerow([cwid, i, md5.hexdigest()])
 
-def ikat_segmenter_worker(worker_id: int, line_queue: Queue, gen_json: bool, gen_trecweb: bool, output_path: str, max_len: int, stride: int) -> None:
+def ikat_segmenter_worker(worker_id: int, line_queue: Queue, gen_trecweb: bool, output_path: str, max_len: int, stride: int) -> None:
     """
     Method executed by worker processes during segmentation.
 
@@ -119,7 +119,7 @@ def ikat_segmenter_worker(worker_id: int, line_queue: Queue, gen_json: bool, gen
     chunker = SpacyPassageChunker(max_len=max_len, stride=stride)
     count = 0
 
-    output_json = open(os.path.join(output_path, f'worker_{worker_id:02d}.jsonl'), 'w', encoding='utf-8') if gen_json else None
+    output_json = open(os.path.join(output_path, f'worker_{worker_id:02d}.jsonl'), 'w', encoding='utf-8')
     output_trecweb = open(os.path.join(output_path, f'worker_{worker_id:02d}.trecweb'), 'w', encoding='utf-8') if gen_trecweb else None
     output_hashes = open(os.path.join(output_path, f'worker_{worker_id:02d}_hashes.tsv'), 'w')
     hash_writer = csv.writer(output_hashes, delimiter='\t')
@@ -148,8 +148,7 @@ def ikat_segmenter_worker(worker_id: int, line_queue: Queue, gen_json: bool, gen
         passages = chunker.chunk_document()
 
         # write outputs in one or both formats, plus passage hashes
-        if output_json is not None:
-            write_passages_json(output_json, passages, title, id, url)
+        write_passages_json(output_json, passages, title, id, url)
         
         if output_trecweb is not None:
             write_passages_trecweb(output_trecweb, passages, title, id, url)
@@ -343,7 +342,6 @@ if __name__ == "__main__":
     segment_parser = subparsers.add_parser('segment', help='Segment the collection into JSONL and/or trecweb files')
     segment_parser.add_argument('-i', '--input', help='Path to directory containing iKAT JSONL files (either .json.bz2 or .jsonl)', required=True, type=str)
     segment_parser.add_argument('-t', '--trecweb', help='Generate trecweb files containing passages', action='store_true')
-    segment_parser.add_argument('-j', '--jsonl', help='Generate JSONL files containing passages', action='store_true', default=True)
     segment_parser.add_argument('-o', '--output', help='Path to save output files', required=True, type=str)
     segment_parser.add_argument('-w', '--num_workers', help='Number of parallel workers to use', default=8, type=int)
     segment_parser.add_argument('-m', '--max_len', help='Max length parameter for SpacyPassageChunker', default=10, type=int)
