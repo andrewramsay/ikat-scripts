@@ -223,7 +223,7 @@ def ikat_segmenter(args):
     workers = []
     # create and start the worker processes
     for i in range(args.num_workers):
-        p = Process(target=ikat_segmenter_worker, args=(i, line_queue, args.jsonl, args.trecweb, args.output, args.max_len, args.stride))
+        p = Process(target=ikat_segmenter_worker, args=(i, line_queue, args.trecweb, args.output, args.max_len, args.stride))
         p.start()
         workers.append(p)
 
